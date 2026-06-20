@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KlinikConnect - Manajemen Terpadu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div id="loginScreen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; display:flex; align-items:center; justify-content:center;">
+    <div class="card p-4 shadow-lg" style="width: 350px;">
+        <h4 class="text-center text-primary fw-bold mb-3">🔐 KlinikConnect</h4>
+        <form id="formLogin">
+            <div class="mb-3">
+                <label>Username</label>
+                <input type="text" id="loginUser" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label>Password</label>
+                <input type="password" id="loginPass" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 fw-bold">Masuk</button>
+        </form>
+    </div>
+</div>
+
+<div class="container mt-4 mb-5">
+    <button class="btn btn-danger btn-sm float-end" onclick="logout()">🚪 Keluar Sesi</button>
+    <h2 class="text-center mb-1 text-primary fw-bold">🏥 Dashboard KlinikConnect</h2>
+    <p class="text-center text-muted mb-4" id="roleText">Memuat sesi...</p>
+    
+    <div class="row" id="rowDokter">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white" id="headerDokter"><h5 class="mb-0">Data Dokter</h5></div>
+                <div class="card-body">
+                    <form id="formDokter">
+                        <input type="hidden" id="id_dokter_edit">
+                        <div class="mb-2"><label>Nama</label><input type="text" class="form-control" id="nama_dokter" required></div>
+                        <div class="mb-2"><label>Spesialisasi</label><input type="text" class="form-control" id="spesialisasi" required></div>
+                        <div class="mb-2"><label>No. Izin</label><input type="text" class="form-control" id="no_izin" required></div>
+                        <div class="mb-3"><label>Upload Foto</label><input type="file" class="form-control" id="foto_profil"></div>
+                        <button type="submit" class="btn btn-primary w-100" id="btnDokter">Simpan Dokter</button>
+                        <button type="button" class="btn btn-secondary w-100 mt-2 d-none" id="cancelDokter" onclick="batalDokter()">Batal</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-dark text-white"><h5 class="mb-0">Daftar Tenaga Medis</h5></div>
+                <div class="card-body table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead><tr><th>ID</th><th>Nama Dokter</th><th>Spesialisasi</th><th>Aksi</th></tr></thead>
+                        <tbody id="tabelDokter"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white" id="headerPasien"><h5 class="mb-0">Data Pasien</h5></div>
+                <div class="card-body">
+                    <form id="formPasien">
+                        <input type="hidden" id="id_pasien_edit">
+                        <div class="mb-2"><label>NIK</label><input type="text" class="form-control form-control-sm" id="nik_pasien" required></div>
+                        <div class="mb-2"><label>Nama Lengkap</label><input type="text" class="form-control form-control-sm" id="nama_pasien" required></div>
+                        <div class="row">
+                            <div class="col-6 mb-2"><label>Tgl Lahir</label><input type="date" class="form-control form-control-sm" id="tgl_lahir_pasien" required></div>
+                            <div class="col-6 mb-2"><label>No. Telp</label><input type="text" class="form-control form-control-sm" id="telp_pasien" required></div>
+                        </div>
+                        <div class="mb-2"><label>Alamat</label><textarea class="form-control form-control-sm" id="alamat_pasien" required></textarea></div>
+                        <div class="mb-3"><label>Upload Foto ID</label><input type="file" class="form-control form-control-sm" id="foto_pasien"></div>
+                        <button type="submit" class="btn btn-success w-100" id="btnPasien">Simpan Pasien</button>
+                        <button type="button" class="btn btn-secondary w-100 mt-2 d-none" id="cancelPasien" onclick="batalPasien()">Batal</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white"><h5 class="mb-0">Daftar Pasien</h5></div>
+                <div class="card-body table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead><tr><th>ID</th><th>Nama Lengkap</th><th>No. Telepon</th><th>Aksi</th></tr></thead>
+                        <tbody id="tabelPasien"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-dark" id="headerReservasi"><h5 class="mb-0">Reservasi Kunjungan</h5></div>
+                <div class="card-body">
+                    <form id="formReservasi">
+                        <input type="hidden" id="id_reservasi_edit">
+                        <div class="mb-2"><label>Pilih Pasien</label><select class="form-select form-select-sm" id="pilih_pasien" required></select></div>
+                        <div class="mb-2"><label>Pilih Jadwal</label><select class="form-select form-select-sm" id="pilih_jadwal" required></select></div>
+                        <div class="mb-2"><label>Tgl Kunjungan</label><input type="date" class="form-control form-control-sm" id="tgl_kunjungan" required></div>
+                        <div class="mb-2"><label>Keluhan</label><textarea class="form-control form-control-sm" id="keluhan_awal" rows="2" required></textarea></div>
+                        <div class="mb-3 d-none" id="divStatus">
+                            <label class="fw-bold text-danger">Status Reservasi</label>
+                            <select class="form-select form-select-sm" id="status_reservasi">
+                                <option value="Menunggu">Menunggu</option><option value="Selesai">Selesai</option><option value="Batal">Batal</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100 fw-bold" id="btnReservasi">Buat Reservasi</button>
+                        <button type="button" class="btn btn-secondary w-100 mt-2 d-none" id="cancelReservasi" onclick="batalReservasi()">Batal</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark"><h5 class="mb-0">Daftar Reservasi Kunjungan</h5></div>
+                <div class="card-body table-responsive">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead><tr><th>Pasien</th><th>Dokter</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr></thead>
+                        <tbody id="tabelReservasi"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- GANTI DENGAN LINK NGROK MILIKMU ---
+    const API_URL = "https://monsieur-modified-fidelity.ngrok-free.dev/api/";
+
+    // 1. LOGIN SYSTEM
+    document.getElementById("formLogin").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append("username", document.getElementById("loginUser").value);
+        formData.append("password", document.getElementById("loginPass").value);
+
+        // PENAMBAHAN HEADER NGROK-SKIP-BROWSER-WARNING
+        const res = await fetch(API_URL + "login", { 
+            method: "POST", 
+            headers: {
+                "ngrok-skip-browser-warning": "true"
+            },
+            body: formData 
+        });
+        const data = await res.json();
+
+        if (data.sukses) {
+            localStorage.setItem("KlinikToken", data.token);
+            localStorage.setItem("KlinikRole", data.role);
+            document.getElementById("loginScreen").style.display = "none";
+            loadData();
+        } else { alert(data.pesan); }
+    });
+
+    function logout() {
+        localStorage.clear();
+        location.reload();
+    }
+
+    // PENAMBAHAN HEADER NGROK-SKIP-BROWSER-WARNING PADA SEMUA REQUEST LAINNYA
+    function getAuthHeaders() {
+        return { 
+            "Authorization": "Bearer " + localStorage.getItem("KlinikToken"),
+            "ngrok-skip-browser-warning": "true"
+        };
+    }
+
+    if (localStorage.getItem("KlinikToken")) {
+        document.getElementById("loginScreen").style.display = "none";
+        loadData();
+    }
+
+    // 2. LOAD DATA & RENDER UI BERDASARKAN ROLE
+    async function loadData() {
+        const userRole = localStorage.getItem("KlinikRole");
+        const btnDeleteHtml = userRole === "admin"; // Hanya True jika Admin
+
+        // Menyesuaikan Teks dan Tampilan berdasarkan Role
+        if (userRole === "petugas") {
+            document.getElementById("roleText").innerHTML = "Sistem Terbatas: Petugas Front Desk";
+            document.getElementById("rowDokter").style.display = "none";
+        } else {
+            document.getElementById("roleText").innerHTML = "Akses Penuh: Administrator";
+            document.getElementById("rowDokter").style.display = "flex";
+        }
+
+        try {
+            // Load Dokter (Hanya berguna untuk Admin, tapi aman di background)
+            let res = await fetch(API_URL + "dokter", { headers: getAuthHeaders() });
+            let data = await res.json();
+            document.getElementById("tabelDokter").innerHTML = "";
+            data.forEach(d => {
+                let hapusBtn = btnDeleteHtml ? `<button class="btn btn-danger btn-sm" onclick="hapusData('dokter', ${d.id_dokter})">🗑️</button>` : '';
+                document.getElementById("tabelDokter").innerHTML += `<tr>
+                    <td>${d.id_dokter}</td><td class="fw-bold">${d.nama_dokter}</td><td>${d.spesialisasi}</td>
+                    <td><button class="btn btn-warning btn-sm" onclick="editDokter(${d.id_dokter}, '${d.nama_dokter}', '${d.spesialisasi}', '${d.no_izin_praktik}')">✏️</button> ${hapusBtn}</td></tr>`;
+            });
+
+            // Load Pasien
+            res = await fetch(API_URL + "pasien", { headers: getAuthHeaders() });
+            data = await res.json();
+            document.getElementById("tabelPasien").innerHTML = "";
+            document.getElementById("pilih_pasien").innerHTML = '<option value="">-- Pilih --</option>';
+            data.forEach(p => {
+                let hapusBtn = btnDeleteHtml ? `<button class="btn btn-danger btn-sm" onclick="hapusData('pasien', ${p.id_pasien})">🗑️</button>` : '';
+                document.getElementById("tabelPasien").innerHTML += `<tr>
+                    <td>${p.id_pasien}</td><td class="fw-bold">${p.nama_lengkap}</td><td>${p.no_telepon}</td>
+                    <td><button class="btn btn-warning btn-sm" onclick="editPasien(${p.id_pasien}, '${p.nik}', '${p.nama_lengkap}', '${p.tanggal_lahir}', '${p.no_telepon}', '${p.alamat}')">✏️</button> ${hapusBtn}</td></tr>`;
+                document.getElementById("pilih_pasien").innerHTML += `<option value="${p.id_pasien}">${p.nama_lengkap}</option>`;
+            });
+
+            // Load Jadwal
+            res = await fetch(API_URL + "jadwal", { headers: getAuthHeaders() });
+            data = await res.json();
+            document.getElementById("pilih_jadwal").innerHTML = '<option value="">-- Pilih --</option>';
+            data.forEach(j => {
+                document.getElementById("pilih_jadwal").innerHTML += `<option value="${j.id_jadwal}">${j.hari_praktik} - Dr. ${j.nama_dokter}</option>`;
+            });
+
+            // Load Reservasi
+            res = await fetch(API_URL + "reservasi", { headers: getAuthHeaders() });
+            data = await res.json();
+            document.getElementById("tabelReservasi").innerHTML = "";
+            data.forEach(r => {
+                let badge = r.status_reservasi === 'Selesai' ? 'bg-success' : (r.status_reservasi === 'Batal' ? 'bg-danger' : 'bg-secondary');
+                let hapusBtn = btnDeleteHtml ? `<button class="btn btn-danger btn-sm" onclick="hapusData('reservasi', ${r.id_reservasi})">🗑️</button>` : '';
+                document.getElementById("tabelReservasi").innerHTML += `<tr>
+                    <td class="fw-bold">${r.nama_pasien}</td><td>Dr. ${r.nama_dokter}</td><td>${r.tanggal_kunjungan}</td>
+                    <td><span class="badge ${badge}">${r.status_reservasi}</span></td>
+                    <td><button class="btn btn-warning btn-sm" onclick="editReservasi(${r.id_reservasi}, ${r.id_pasien}, ${r.id_jadwal}, '${r.tanggal_kunjungan}', '${r.keluhan_awal}', '${r.status_reservasi}')">✏️</button> ${hapusBtn}</td></tr>`;
+            });
+        } catch (err) { console.error(err); }
+    }
+
+    // 3. SUBMIT & DELETE LOGIC
+    async function submitForm(event, tipe, formId) {
+        event.preventDefault();
+        const formData = new FormData();
+        
+        if (tipe === 'dokter') {
+            formData.append("nama_dokter", document.getElementById("nama_dokter").value);
+            formData.append("spesialisasi", document.getElementById("spesialisasi").value);
+            formData.append("no_izin_praktik", document.getElementById("no_izin").value);
+            if (document.getElementById("foto_profil").files[0]) formData.append("foto_profil", document.getElementById("foto_profil").files[0]);
+        } else if (tipe === 'pasien') {
+            formData.append("nik", document.getElementById("nik_pasien").value);
+            formData.append("nama_lengkap", document.getElementById("nama_pasien").value);
+            formData.append("tanggal_lahir", document.getElementById("tgl_lahir_pasien").value);
+            formData.append("no_telepon", document.getElementById("telp_pasien").value);
+            formData.append("alamat", document.getElementById("alamat_pasien").value);
+            if (document.getElementById("foto_pasien").files[0]) formData.append("foto_pasien", document.getElementById("foto_pasien").files[0]);
+        } else if (tipe === 'reservasi') {
+            formData.append("id_pasien", document.getElementById("pilih_pasien").value);
+            formData.append("id_jadwal", document.getElementById("pilih_jadwal").value);
+            formData.append("tanggal_kunjungan", document.getElementById("tgl_kunjungan").value);
+            formData.append("keluhan_awal", document.getElementById("keluhan_awal").value);
+            if (document.getElementById("id_reservasi_edit").value) formData.append("status_reservasi", document.getElementById("status_reservasi").value);
+        }
+
+        const idEdit = document.getElementById("id_" + tipe + "_edit").value;
+        let url = API_URL + tipe;
+        let method = idEdit ? "PUT" : "POST";
+        if (idEdit) url += "?id=" + idEdit;
+
+        try {
+            const response = await fetch(url, { method: method, headers: getAuthHeaders(), body: formData });
+            if (response.ok) { 
+                alert("Data Tersimpan!"); 
+                if (tipe==='dokter') batalDokter(); else if (tipe==='pasien') batalPasien(); else batalReservasi(); 
+                loadData(); 
+            } else { alert("Aksi ditolak oleh server."); }
+        } catch (error) { console.error(error); }
+    }
+
+    document.getElementById("formDokter").addEventListener("submit", (e) => submitForm(e, 'dokter', 'formDokter'));
+    document.getElementById("formPasien").addEventListener("submit", (e) => submitForm(e, 'pasien', 'formPasien'));
+    document.getElementById("formReservasi").addEventListener("submit", (e) => submitForm(e, 'reservasi', 'formReservasi'));
+
+    async function hapusData(tipe, id) {
+        if (confirm("Yakin hapus data ini?")) {
+            const response = await fetch(API_URL + tipe + "?id=" + id, { method: "DELETE", headers: getAuthHeaders() });
+            if(response.ok) { loadData(); } else { alert("Hak akses ditolak!"); }
+        }
+    }
+
+    // 4. PREPARATION FUNCTIONS (EDIT & BATAL)
+    function editDokter(id, nama, spesialisasi, izin) {
+        document.getElementById("id_dokter_edit").value = id; document.getElementById("nama_dokter").value = nama;
+        document.getElementById("spesialisasi").value = spesialisasi; document.getElementById("no_izin").value = izin;
+        document.getElementById("headerDokter").classList.replace("bg-primary", "bg-warning");
+        document.getElementById("btnDokter").textContent = "Update"; document.getElementById("cancelDokter").classList.remove("d-none");
+    }
+    function batalDokter() {
+        document.getElementById("formDokter").reset(); document.getElementById("id_dokter_edit").value = "";
+        document.getElementById("headerDokter").classList.replace("bg-warning", "bg-primary");
+        document.getElementById("btnDokter").textContent = "Simpan"; document.getElementById("cancelDokter").classList.add("d-none");
+    }
+
+    function editPasien(id, nik, nama, tgl, telp, almt) {
+        document.getElementById("id_pasien_edit").value = id; document.getElementById("nik_pasien").value = nik;
+        document.getElementById("nama_pasien").value = nama; document.getElementById("tgl_lahir_pasien").value = tgl;
+        document.getElementById("telp_pasien").value = telp; document.getElementById("alamat_pasien").value = almt;
+        document.getElementById("headerPasien").classList.replace("bg-success", "bg-warning");
+        document.getElementById("btnPasien").textContent = "Update"; document.getElementById("cancelPasien").classList.remove("d-none");
+    }
+    function batalPasien() {
+        document.getElementById("formPasien").reset(); document.getElementById("id_pasien_edit").value = "";
+        document.getElementById("headerPasien").classList.replace("bg-warning", "bg-success");
+        document.getElementById("btnPasien").textContent = "Simpan"; document.getElementById("cancelPasien").classList.add("d-none");
+    }
+
+    function editReservasi(id, id_pasien, id_jadwal, tgl, keluhan, status) {
+        document.getElementById("id_reservasi_edit").value = id; document.getElementById("pilih_pasien").value = id_pasien;
+        document.getElementById("pilih_jadwal").value = id_jadwal; document.getElementById("tgl_kunjungan").value = tgl;
+        document.getElementById("keluhan_awal").value = keluhan; document.getElementById("divStatus").classList.remove("d-none");
+        document.getElementById("status_reservasi").value = status;
+        document.getElementById("btnReservasi").textContent = "Update"; document.getElementById("cancelReservasi").classList.remove("d-none");
+    }
+    function batalReservasi() {
+        document.getElementById("formReservasi").reset(); document.getElementById("id_reservasi_edit").value = "";
+        document.getElementById("divStatus").classList.add("d-none");
+        document.getElementById("btnReservasi").textContent = "Buat Reservasi"; document.getElementById("cancelReservasi").classList.add("d-none");
+    }
+</script>
+
+</body>
+</html>
